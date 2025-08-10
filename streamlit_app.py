@@ -10,7 +10,7 @@ st.title("🛠️ Steel Plates Faults Prediction")
 
 @st.cache_data
 def load_data():
-    url = "https://archive.ics.uci.edu/ml/machine-learning-databases/00243/SteelPlateFaults-2class.csv"
+    url = "https://raw.githubusercontent.com/Besma1a/steel-plates-data/refs/heads/main/Steel_Plates_Faults.csv"
     df = pd.read_csv(url)
     df.columns = df.columns.str.strip().str.replace('\t', '', regex=True)
     return df
