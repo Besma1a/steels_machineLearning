@@ -1,11 +1,10 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
 import altair as alt
 import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
-from sklearn.neural_network import MLPClassifier
+from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.multioutput import MultiOutputClassifier
 
 st.title("🛠️ Steel Plates Faults Prediction")
@@ -30,7 +29,7 @@ def train_model():
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X)
     model = MultiOutputClassifier(
-        MLPClassifier(hidden_layer_sizes=(150, 100), max_iter=200, early_stopping=True, random_state=42)
+        GradientBoostingClassifier(n_estimators=100, max_depth=3, random_state=42)
     )
     model.fit(X_scaled, y)
     return model, scaler
@@ -38,7 +37,6 @@ def train_model():
 model, scaler = train_model()
 
 st.sidebar.header("Input Features")
-
 desc = X.describe()
 input_data = {}
 for feature in X.columns:
@@ -55,8 +53,15 @@ if st.button("Predict Faults"):
     prediction = model.predict(input_scaled)
     prediction_proba = model.predict_proba(input_scaled)
 
-    st.subheader("Predicted Faults (1 means fault detected)")
     pred_dict = {label_cols[i]: int(prediction[0][i]) for i in range(len(label_cols))}
+    faults_detected = [fault for fault, pred in pred_dict.items() if pred == 1]
+
+    if len(faults_detected) == 0:
+        st.success("No faults detected!")
+    else:
+        st.warning(f"Potential faults detected: {', '.join(faults_detected)}")
+
+    st.subheader("Predicted Faults (1 means fault detected)")
     pred_df = pd.DataFrame.from_dict(pred_dict, orient='index', columns=['Fault Detected'])
     st.dataframe(pred_df.style.applymap(lambda x: 'background-color : lightgreen' if x==1 else ''))
 
@@ -79,5 +84,5 @@ ax.set_title(f'Distribution of {feature_to_plot}')
 st.pyplot(fig)
 
 st.sidebar.subheader("Model Info")
-st.sidebar.write("Model: MLP Classifier")
+st.sidebar.write("Model: Gradient Boosting")
 st.sidebar.write("Training on full dataset inside the app")
