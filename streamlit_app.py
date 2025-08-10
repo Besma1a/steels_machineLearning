@@ -30,7 +30,7 @@ def train_model():
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X)
     model = MultiOutputClassifier(
-        MLPClassifier(hidden_layer_sizes=(150, 100), max_iter=2000, random_state=42)
+        MLPClassifier(hidden_layer_sizes=(150, 100), max_iter=200, early_stopping=True, random_state=42)
     )
     model.fit(X_scaled, y)
     return model, scaler
